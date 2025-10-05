@@ -1,733 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#1a1a2e">
-  <title>YouTube Player - Playlist Mode</title>
-  <link rel="manifest" href="/manifest.json">
-  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube PWA Player</title>
+
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#1a1a2e" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+
   <style>
-    * {box-sizing: border-box;}
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #1a1a2e;
-      color: #fff;
+      background-color: #0f0f1a;
+      color: white;
+      font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-    }
-    .container {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-    .header {
-      font-size: 1.5rem;
-      font-weight: bold;
-      margin-bottom: 20px;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 15px;
     }
-    .raj-logo {
-      width: 50px;
-      height: 50px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      font-weight: bold;
+
+    h1 {
+      margin-top: 20px;
+      color: #ff4b5c;
+    }
+
+    input {
+      width: 80%;
+      max-width: 400px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      outline: none;
+      margin-top: 15px;
+      font-size: 16px;
+    }
+
+    button {
+      margin-top: 10px;
+      padding: 10px 20px;
+      background: #ff4b5c;
+      border: none;
+      border-radius: 8px;
       color: white;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      cursor: pointer;
+      font-size: 16px;
     }
-    .main-layout {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 20px;
+
+    button:hover {
+      background: #ff6b7c;
     }
-    @media (max-width: 768px) {
-      .main-layout {
-        grid-template-columns: 1fr;
-      }
-    }
-    .player-panel, .saved-videos-panel {
-      background: #222;
+
+    .result {
+      margin-top: 20px;
+      width: 80%;
+      max-width: 600px;
+      background: #1e1e2f;
       padding: 15px;
       border-radius: 10px;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
     }
-    .ad-container {
-      background: #fff;
-      min-height: 250px;
-      border-radius: 10px;
-      margin-top: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #333;
-      font-size: 0.9rem;
-      padding: 20px;
-      text-align: center;
-    }
-    .video-wrapper {
+
+    video {
       width: 100%;
-      background: #000;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 10px;
+      border-radius: 8px;
+      margin-top: 10px;
     }
-    .video-wrapper video, .video-wrapper audio {
-      width: 100%;
-      height: auto;
-      min-height: 300px;
-      display: block;
-    }
-    .video-title {
-      font-size: 1.2rem;
-      margin: 10px 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .search-bar {
-      margin: 15px 0;
-    }
-    .search-input-container {
-      display: flex;
-      gap: 10px;
-    }
-    .search-input {
-      flex: 1;
-      padding: 12px;
-      border-radius: 5px;
-      border: 1px solid #444;
-      background: #333;
-      color: #fff;
-      font-size: 14px;
-    }
-    .search-input:focus {
-      outline: none;
-      border-color: #667eea;
-    }
-    .search-btn {
-      padding: 12px 24px;
-      background: #667eea;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    .search-btn:hover {
-      background: #5568d3;
-    }
-    .search-btn:disabled {
-      background: #555;
-      cursor: not-allowed;
-    }
-    .btn-save {
-      background: #4caf50;
-      color: #fff;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.3s;
-    }
-    .btn-save:hover {
-      background: #45a049;
-    }
-    .volume-control {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 10px 0;
-    }
-    .volume-control input {
-      flex: 1;
-    }
-    .saved-videos-grid {
-      display: grid;
-      gap: 15px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
-    .video-card {
-      background: #333;
-      border-radius: 10px;
-      padding: 10px;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .video-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.4);
-    }
-    .video-thumbnail {
-      width: 100%;
-      height: 140px;
-      object-fit: cover;
-      border-radius: 5px;
-    }
-    .video-card-info {
-      padding: 8px 0;
-    }
-    .video-card-title {
-      font-weight: bold;
-      margin-bottom: 5px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-    }
-    .video-card-info button {
-      margin-top: 8px;
-      padding: 8px 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      font-weight: bold;
-      transition: opacity 0.2s;
-    }
-    .video-card-info button:hover {
-      opacity: 0.9;
-    }
-    .video-card-info .btn-play {
-      background: #667eea;
-      color: #fff;
-    }
-    .video-card-info .btn-download {
-      background: #4caf50;
-      color: #fff;
-      margin-left: 5px;
-    }
-    .video-card-info .btn-delete {
-      background: #ff4757;
-      color: #fff;
-      margin-left: 5px;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 40px 20px;
-      color: #888;
-    }
-    .search-results {
-      margin-top: 15px;
-      max-height: 400px;
-      overflow-y: auto;
-    }
-    .status-message {
-      padding: 10px;
-      margin: 10px 0;
-      border-radius: 5px;
-      display: none;
-    }
-    .status-message.success {
-      background: #4caf50;
-      display: block;
-    }
-    .status-message.error {
-      background: #ff4757;
-      display: block;
-    }
-    .status-message.info {
-      background: #667eea;
-      display: block;
-    }
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #fff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+
+    footer {
+      margin-top: 40px;
+      font-size: 13px;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="header">
-      <div class="raj-logo">RAJ</div>
-      <span>YouTube PWA Player</span>
-    </div>
-    
-    <div class="main-layout">
-      <div class="player-panel">
-        <div class="player-container" id="playerContainer" style="display:none;">
-          <div class="video-wrapper" id="videoWrapper"></div>
-          <div class="video-title" id="videoTitle">Video Title</div>
-          
-          <div class="volume-control">
-            <label>Volume:</label>
-            <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="0.8">
-            <span id="volumeValue">80%</span>
-          </div>
-        </div>
-        
-        <div class="search-bar">
-          <div class="search-input-container">
-            <input 
-              type="text" 
-              class="search-input" 
-              id="videoUrl" 
-              placeholder="Search or paste YouTube URL..."
-              onkeypress="handleKeyPress(event)">
-            <button class="search-btn" onclick="handleSearch()" id="searchBtn">
-              Search
-            </button>
-          </div>
-          <div class="status-message" id="statusMessage"></div>
-          <div class="search-results" id="searchResults"></div>
-        </div>
-        
-        <div class="ad-container">
-          <div>
-            <strong>Advertisement Space</strong><br>
-            <small>Google AdSense goes here<br>
-            Insert your ad code in this container</small>
-          </div>
-        </div>
-      </div>
-      
-      <div class="saved-videos-panel">
-        <h2>Saved Playlist</h2>
-        <div class="saved-videos-grid" id="savedVideosGrid">
-          <div class="empty-state">
-            <h3>No saved videos yet</h3>
-            <p>Search and download videos to build your playlist</p>
-          </div>
-        </div>
-        
-        <div class="ad-container">
-          <div>
-            <strong>Advertisement Space</strong><br>
-            <small>Google AdSense goes here<br>
-            Insert your ad code in this container</small>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <h1>🎬 YouTube PWA Player</h1>
+
+  <input type="text" id="videoUrl" placeholder="Enter YouTube video URL" />
+  <button onclick="processVideo()">Download / Play</button>
+
+  <div id="loadingSection" style="display: none;">Processing video... Please wait.</div>
+  <div id="resultSection" class="result" style="display: none;"></div>
+
+  <footer>© 2025 RYP Player — Powered by Flask & Render</footer>
 
   <script>
-    const backendUrl = "http://localhost:5000";
-    let currentVideoIndex = 0;
-    let savedPlaylist = [];
-    let selectedQuality = '720p';
-    let selectedFormat = 'mp4';
-    let playerEl = null;
-    let currentStreamingVideo = null;
+    // ✅ Connects to your Render backend
+    const backendUrl = "https://ryp-o49g.onrender.com";
 
-    function handleKeyPress(event) {
-      if (event.key === 'Enter') {
-        handleSearch();
-      }
-    }
+    async function processVideo() {
+      const url = document.getElementById("videoUrl").value.trim();
+      const loading = document.getElementById("loadingSection");
+      const result = document.getElementById("resultSection");
 
-    function extractVideoId(input) {
-      const urlPatterns = [
-        /(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
-        /youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/,
-        /youtube\.com\/v\/([a-zA-Z0-9_-]{11})/
-      ];
-      
-      for (const pattern of urlPatterns) {
-        const match = input.match(pattern);
-        if (match) return match[1];
-      }
-      
-      if (/^[a-zA-Z0-9_-]{11}$/.test(input)) {
-        return input;
-      }
-      
-      return null;
-    }
-
-    async function handleSearch() {
-      const input = document.getElementById('videoUrl').value.trim();
-      if (!input) {
-        showStatus('Please enter search keywords or YouTube URL', 'error');
+      if (!url) {
+        alert("Please enter a YouTube URL");
         return;
       }
 
-      const btn = document.getElementById('searchBtn');
-      btn.disabled = true;
-      btn.innerHTML = '<span class="loading"></span> Loading...';
+      loading.style.display = "block";
+      result.style.display = "none";
+      result.innerHTML = "";
 
       try {
-        const videoId = extractVideoId(input);
-        
-        if (videoId) {
-          const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-          await streamVideo(videoUrl, 'Loading video...');
-        } else {
-          await searchVideos(input);
-        }
-      } catch (error) {
-        showStatus('Error: ' + error.message, 'error');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = 'Search';
-      }
-    }
-
-    async function searchVideos(query) {
-      try {
-        const res = await fetch(`${backendUrl}/search`, {
+        const response = await fetch(`${backendUrl}/download`, {
           method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({query, max_results: 10})
-        });
-        
-        if (!res.ok) throw new Error('Search failed');
-        
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
-          displaySearchResults(data.results);
-          showStatus(`Found ${data.results.length} results. Click Play to stream or Save to download.`, 'info');
-        } else {
-          showStatus('No results found', 'error');
-        }
-      } catch (error) {
-        showStatus('Search error: ' + error.message, 'error');
-      }
-    }
-
-    function displaySearchResults(results) {
-      const div = document.getElementById('searchResults');
-      div.style.display = 'block';
-      div.innerHTML = results.map(v => `
-        <div class="video-card">
-          <img src="${v.thumbnail}" class="video-thumbnail" alt="${v.title}">
-          <div class="video-card-info">
-            <div class="video-card-title">${v.title}</div>
-            <div style="display: flex; gap: 5px; margin-top: 8px;">
-              <button class="btn-play" onclick="streamVideo('${v.url.replace(/'/g, "\\'")}', '${v.title.replace(/'/g, "\\'")}')">
-                Play
-              </button>
-              <button class="btn-download" onclick="downloadAndPlay('${v.url.replace(/'/g, "\\'")}', '${v.title.replace(/'/g, "\\'")}')">
-                Save
-              </button>
-              <button class="btn-download" onclick="downloadToDevice('${v.url.replace(/'/g, "\\'")}', '${v.title.replace(/'/g, "\\'")}')">
-                DL
-              </button>
-            </div>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    async function streamVideo(url, title) {
-      showStatus('Loading video for streaming...', 'info');
-      currentStreamingVideo = { url, title };
-      
-      try {
-        const res = await fetch(`${backendUrl}/stream-direct`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({ url: url })
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
         });
 
-        if (!res.ok) {
-          throw new Error('Streaming failed. Try downloading instead.');
+        if (!response.ok) {
+          throw new Error("Failed to fetch video info");
         }
-        
-        const data = await res.json();
-        
-        if (data.stream_url) {
-          showStatus('Playing video...', 'success');
-          setTimeout(hideStatus, 2000);
-          
-          const wrapper = document.getElementById('videoWrapper');
-          wrapper.innerHTML = `
-            <video id="player" controls autoplay crossorigin="anonymous">
-              <source src="${data.stream_url}" type="video/mp4">
-              Your browser does not support the video tag.
-            </video>
+
+        const data = await response.json();
+        loading.style.display = "none";
+        result.style.display = "block";
+
+        if (data.error) {
+          result.innerHTML = `<p style="color: red;">Error: ${data.error}</p>`;
+        } else {
+          result.innerHTML = `
+            <h3>${data.title}</h3>
+            <video controls src="${data.file}" poster="${data.thumbnail}"></video>
+            <p><a href="${data.file}" download>⬇️ Download Video</a></p>
           `;
-          
-          playerEl = document.getElementById("player");
-          playerEl.volume = 0.8;
-          
-          playerEl.onerror = function() {
-            showStatus('Stream error. Downloading video for playback...', 'info');
-            downloadAndPlay(url, title);
-          };
-          
-          document.getElementById('videoTitle').innerHTML = `
-            <span>${title}</span>
-            <div style="display: flex; gap: 8px;">
-              <button class="btn-save" onclick="downloadAndPlay('${url.replace(/'/g, "\\'")}', '${title.replace(/'/g, "\\'")}')">
-                Save Offline
-              </button>
-              <button class="btn-save" onclick="downloadToDevice('${url.replace(/'/g, "\\'")}', '${title.replace(/'/g, "\\'")}')">
-                Download
-              </button>
-            </div>
-          `;
-          document.getElementById('playerContainer').style.display = 'block';
-          document.getElementById('searchResults').style.display = 'none';
-        } else {
-          throw new Error('No stream URL available');
         }
+
       } catch (error) {
-        showStatus('Streaming not available. Downloading video...', 'info');
-        await downloadAndPlay(url, title);
+        console.error(error);
+        loading.style.display = "none";
+        result.style.display = "block";
+        result.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
       }
     }
 
-    async function downloadToDevice(url, title) {
-      showStatus('Preparing download...', 'info');
-      
-      try {
-        const videoId = Date.now().toString();
-        
-        const res = await fetch(`${backendUrl}/download`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            url: url,
-            quality: selectedQuality,
-            format: selectedFormat,
-            video_id: videoId
-          })
-        });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Download failed');
-        }
-        
-        const data = await res.json();
-        
-        if (data.success && data.metadata) {
-          showStatus('Download ready! Starting download...', 'success');
-          
-          const downloadUrl = `${backendUrl}/stream/${data.metadata.filename}`;
-          const a = document.createElement('a');
-          a.href = downloadUrl;
-          a.download = `${title}.${selectedFormat}`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          
-          showStatus('Download started! Check your downloads folder.', 'success');
-          setTimeout(hideStatus, 3000);
-          
-          await loadSavedVideos();
-        } else {
-          throw new Error(data.error || 'Download failed');
-        }
-      } catch (error) {
-        showStatus('Error: ' + error.message, 'error');
-      }
-    }
-
-    async function downloadAndPlay(url, title) {
-      showStatus('Downloading video... This may take a moment.', 'info');
-      
-      try {
-        const videoId = Date.now().toString();
-        
-        const res = await fetch(`${backendUrl}/download`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify({
-            url: url,
-            quality: selectedQuality,
-            format: selectedFormat,
-            video_id: videoId
-          })
-        });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Download failed');
-        }
-        
-        const data = await res.json();
-        
-        if (data.success && data.metadata) {
-          showStatus('Download complete! Playing now...', 'success');
-          
-          await loadSavedVideos();
-          
-          setTimeout(() => {
-            playOfflineVideo(data.metadata.filename, data.metadata.title);
-            document.getElementById('searchResults').style.display = 'none';
-          }, 500);
-        } else {
-          throw new Error(data.error || 'Download failed');
-        }
-      } catch (error) {
-        showStatus('Error: ' + error.message, 'error');
-      }
-    }
-
-    function playNext() {
-      if (currentVideoIndex + 1 < savedPlaylist.length) {
-        currentVideoIndex++;
-        const v = savedPlaylist[currentVideoIndex];
-        playOfflineVideo(v.filename, v.title);
-      }
-    }
-
-    async function loadSavedVideos() {
-      try {
-        const res = await fetch(`${backendUrl}/saved-videos`);
-        if (!res.ok) throw new Error('Failed to load saved videos');
-        
-        savedPlaylist = await res.json();
-        renderSavedVideos(savedPlaylist);
-      } catch (error) {
-        console.error('Error loading saved videos:', error);
-      }
-    }
-
-    function renderSavedVideos(videos) {
-      const grid = document.getElementById('savedVideosGrid');
-      
-      if (!videos || videos.length === 0) {
-        grid.innerHTML = `
-          <div class="empty-state">
-            <h3>No saved videos yet</h3>
-            <p>Search and download videos to build your playlist</p>
-          </div>
-        `;
-        return;
-      }
-
-      grid.innerHTML = videos.map((v, i) => `
-        <div class="video-card">
-          <img src="${v.thumbnail || '/icons/icon-192.png'}" 
-               class="video-thumbnail" 
-               alt="${v.title}"
-               onerror="this.src='/icons/icon-192.png'">
-          <div class="video-card-info">
-            <div class="video-card-title">${v.title}</div>
-            <div style="font-size: 0.85rem; color: #aaa; margin: 5px 0;">
-              ${v.quality || ''} ${v.format || ''}
-            </div>
-            <button class="btn-play" onclick="currentVideoIndex=${i}; playOfflineVideo('${v.filename}', '${v.title.replace(/'/g, "\\'")}')">
-              Play
-            </button>
-            <button class="btn-download" onclick="downloadSavedVideo('${v.filename}', '${v.title.replace(/'/g, "\\'")}', '${v.format}')">
-              DL
-            </button>
-            <button class="btn-delete" onclick="deleteSavedVideo('${v.id}')">
-              Delete
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function playOfflineVideo(filename, title) {
-      const ext = filename.split('.').pop().toLowerCase();
-      const wrapper = document.getElementById('videoWrapper');
-      
-      if (ext === 'mp3') {
-        wrapper.innerHTML = `
-          <audio id="player" controls autoplay>
-            <source src="${backendUrl}/stream/${filename}" type="audio/mpeg">
-          </audio>
-        `;
-      } else {
-        wrapper.innerHTML = `
-          <video id="player" controls autoplay>
-            <source src="${backendUrl}/stream/${filename}" type="video/mp4">
-          </video>
-        `;
-      }
-
-      playerEl = document.getElementById("player");
-      playerEl.volume = 0.8;
-      playerEl.onended = () => playNext();
-      
-      document.getElementById('videoTitle').innerHTML = `<span>${title}</span>`;
-      document.getElementById('playerContainer').style.display = 'block';
-      
-      hideStatus();
-    }
-
-    async function deleteSavedVideo(videoId) {
-      if (!confirm('Delete this video?')) return;
-
-      try {
-        const res = await fetch(`${backendUrl}/delete/${videoId}`, {
-          method: "DELETE"
-        });
-
-        if (!res.ok) throw new Error('Delete failed');
-        
-        const data = await res.json();
-        
-        if (data.success) {
-          showStatus('Video deleted', 'success');
-          setTimeout(hideStatus, 2000);
-          await loadSavedVideos();
-        }
-      } catch (error) {
-        showStatus('Error deleting video: ' + error.message, 'error');
-      }
-    }
-
-    function downloadSavedVideo(filename, title, format) {
-      const downloadUrl = `${backendUrl}/stream/${filename}`;
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = `${title}.${format || 'mp4'}`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      
-      showStatus('Download started!', 'success');
-      setTimeout(hideStatus, 2000);
-    }
-
-    document.getElementById("volumeSlider").addEventListener("input", (e) => {
-      const volume = parseFloat(e.target.value);
-      if (playerEl) {
-        playerEl.volume = volume;
-      }
-      document.getElementById('volumeValue').textContent = Math.round(volume * 100) + '%';
-    });
-
-    function showStatus(message, type) {
-      const status = document.getElementById('statusMessage');
-      status.textContent = message;
-      status.className = `status-message ${type}`;
-    }
-
-    function hideStatus() {
-      const status = document.getElementById('statusMessage');
-      status.style.display = 'none';
-    }
-
-    window.addEventListener('load', () => {
-      loadSavedVideos();
-    });
-
+    // ✅ Register Service Worker for PWA
     if ("serviceWorker" in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register("/sw.js")
-          .then(reg => {
-            console.log("Service Worker registered:", reg);
-          })
-          .catch(err => {
-            console.log("Service Worker registration failed:", err);
-          });
+      window.addEventListener("load", () => {
+        navigator.serviceWorker
+          .register("sw.js")
+          .then(() => console.log("Service Worker Registered"))
+          .catch(err => console.log("SW registration failed:", err));
       });
     }
   </script>
